@@ -1,11 +1,9 @@
 package work6.db;
 
 import lombok.extern.slf4j.Slf4j;
+import work6.domein.Product;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -77,6 +75,29 @@ public class DataSource {
         }
     }
 
+    public Long executeInsert(String sql) {
+        log.info("execute: {}", sql);
+        try (Connection connection = getConnection()) {
+            return executeInsertStatement(connection, sql);
+        } catch (SQLException e) {
+            log.error("execute select", e);
+            return -1L;
+        }
+    }
+
+    private Long executeInsertStatement(Connection connection, String sql) {
+        try (Statement statement = connection.createStatement()) {
+            statement.executeUpdate(sql, new String[] {"id"});
+            ResultSet rs = statement.getGeneratedKeys();
+            if (rs.next()) {
+                return rs.getLong(1);
+            }
+        } catch (SQLException e) {
+            log.error("execute select statement", e);
+        }
+        return -1L;
+    }
+
     public void addTable(DbTable table) {
         tables.put(table.tableName(), table);
         log.info("append table: '{}' for entity: {}", table.tableName(), table.getEntityClass().getSimpleName());
@@ -97,5 +118,4 @@ public class DataSource {
                 .map(table -> table.getDataMapper())
                 .findAny().orElse(null);
     }
-
 }

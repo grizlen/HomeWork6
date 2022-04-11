@@ -1,12 +1,14 @@
 package work6.db;
 
 import lombok.extern.slf4j.Slf4j;
+import work6.domein.Product;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 public abstract class DataMapper<T extends Entity> {
@@ -38,8 +40,8 @@ public abstract class DataMapper<T extends Entity> {
     }
 
     public abstract List<T> findAll();
-    public abstract T findById(Long id);
-    public abstract void insert(T entity);
+    public abstract Optional<Product> findById(Long id);
+    public abstract T insert(T entity);
     public abstract void update(T entity);
     public abstract void delete(Long id);
 

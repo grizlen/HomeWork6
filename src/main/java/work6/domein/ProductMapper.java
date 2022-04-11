@@ -1,10 +1,13 @@
 package work6.domein;
 
+import lombok.extern.slf4j.Slf4j;
 import work6.db.DataMapper;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
+@Slf4j
 public class ProductMapper extends DataMapper<Product> {
 
     @Override
@@ -20,19 +23,43 @@ public class ProductMapper extends DataMapper<Product> {
     @Override
     public List<Product> findAll() {
         if (dbTable == null) {
-            Collections.emptyList();
+            return Collections.emptyList();
         }
         return dbTable.select().execute(listRecordConverter);
     }
 
     @Override
-    public Product findById(Long id) {
-        return null;
+    public Optional<Product> findById(Long id) {
+        if (dbTable == null) {
+            return Optional.empty();
+        }
+        List<Product> list = dbTable.select()
+                .whereId(id)
+                .execute(listRecordConverter);
+        if (list.size() == 1) {
+            return Optional.ofNullable(list.get(0));
+        }
+        log.error("find by id returns not a single value.");
+        return Optional.empty();
     }
 
     @Override
-    public void insert(Product entity) {
-
+    public Product insert(Product entity) {
+        if (dbTable == null) {
+            return null;
+        }
+        String sql = "INSERT INTO " + dbTable.tableName()
+                + " (title)"
+                + " VALUES "
+                + "('" + entity.getTitle() + "')"
+                + ";";
+        Long id = dbTable.insert(sql);
+        if (id != null && id != -1) {
+            entity.setId(id);
+            return entity;
+        }
+        log.error("insert returns null.");
+        return null;
     }
 
     @Override

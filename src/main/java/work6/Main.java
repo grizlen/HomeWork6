@@ -15,6 +15,10 @@ public class Main {
         ProductMapper productMapper = (ProductMapper) dataSource.getMapper(Product.class);
         if (productMapper != null) {
             productMapper.findAll().forEach(System.out::println);
+            Product product = new Product();
+            product.setTitle("product 4");
+            System.out.println(productMapper.insert(product));
+            System.out.println(productMapper.findById(5L));
         }
     }
 }

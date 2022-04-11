@@ -39,6 +39,10 @@ public abstract class DbTable<T extends Entity> {
         return new SelectQuery(this);
     }
 
+    public Long insert(String sql) {
+        return dataSource.executeInsert(sql);
+    }
+
     public static class SelectQuery {
         private DbTable dbTable;
         private final String table;
@@ -59,6 +63,11 @@ public abstract class DbTable<T extends Entity> {
             }
             sb.append(";");
             return sb.toString();
+        }
+
+        public SelectQuery whereId(Long id) {
+            where = "id = " + id;
+            return this;
         }
 
         public <T extends Entity> List<T> execute(DataMapper.RecordConverter<List<T>> converter) {
