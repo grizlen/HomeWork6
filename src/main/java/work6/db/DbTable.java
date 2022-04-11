@@ -1,24 +1,30 @@
 package work6.db;
 
-import work6.domein.Product;
-
 import java.util.List;
 
 public abstract class DbTable<T extends Entity> {
 
     protected final DataMapper<T> dataMapper;
+    private final IdentityMap<T> identityMap;
     protected final Class<T> entityClass;
     protected final DataSource dataSource;
 
-    public DbTable(DataSource dataSource, DataMapper<T> dataMapper, Class<T> entityClass) {
+    public DbTable(DataSource dataSource, DataMapper<T> dataMapper, IdentityMap<T> identityMap, Class<T> entityClass) {
         this.dataSource = dataSource;
         this.dataMapper = dataMapper;
+        this.identityMap = identityMap;
         this.entityClass = entityClass;
         this.dataMapper.setDbTable(this);
+        this.identityMap.setMapper(this.dataMapper);
     }
+
 
     public DataMapper<T> getDataMapper() {
         return dataMapper;
+    }
+
+    public IdentityMap<T> getIdentityMap() {
+        return identityMap;
     }
 
     public Class<T> getEntityClass() {
@@ -48,12 +54,12 @@ public abstract class DbTable<T extends Entity> {
     }
 
     public static class SelectQuery {
-        private DbTable dbTable;
+        private final DbTable dbTable;
         private final String table;
         private String fields = "*";
         private String where = "";
 
-        public SelectQuery(DbTable DbTable) {
+        private SelectQuery(DbTable DbTable) {
             table = DbTable.tableName();
             dbTable = DbTable;
         }

@@ -3,11 +3,12 @@ package work6.domein;
 import work6.db.DataMapper;
 import work6.db.DataSource;
 import work6.db.DbTable;
+import work6.db.IdentityMap;
 
 public class ProductTable extends DbTable<Product> {
 
-    public ProductTable(DataSource dataSource, DataMapper<Product> dataMapper) {
-        super(dataSource, dataMapper, Product.class);
+    public ProductTable(DataSource dataSource, DataMapper<Product> dataMapper, IdentityMap<Product> identityMap) {
+        super(dataSource, dataMapper, identityMap, Product.class);
     }
 
     @Override

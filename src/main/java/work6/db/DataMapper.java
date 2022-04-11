@@ -1,7 +1,6 @@
 package work6.db;
 
 import lombok.extern.slf4j.Slf4j;
-import work6.domein.Product;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,7 +12,7 @@ import java.util.Optional;
 @Slf4j
 public abstract class DataMapper<T extends Entity> {
 
-    protected DbTable dbTable;
+    protected DbTable<T> dbTable;
     protected RecordConverter<T> recordConverter;
     protected RecordConverter<List<T>> listRecordConverter;
 
@@ -35,12 +34,12 @@ public abstract class DataMapper<T extends Entity> {
 
     protected abstract RecordConverter<T> createRecordConverter();
 
-    public void setDbTable(DbTable dbTable) {
+    public void setDbTable(DbTable<T> dbTable) {
         this.dbTable = dbTable;
     }
 
     public abstract List<T> findAll();
-    public abstract Optional<Product> findById(Long id);
+    public abstract Optional<T> findById(Long id);
     public abstract T insert(T entity);
     public abstract void update(T entity);
     public abstract void delete(Long id);

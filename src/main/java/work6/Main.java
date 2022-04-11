@@ -1,6 +1,7 @@
 package work6;
 
 import work6.db.DataSource;
+import work6.db.IdentityMap;
 import work6.domein.Product;
 import work6.domein.ProductMapper;
 import work6.domein.ProductTable;
@@ -8,21 +9,20 @@ import work6.domein.ProductTable;
 public class Main {
     public static void main(String[] args) {
         DataSource dataSource = new DataSource("db/work6", "sa", "");
-        dataSource.addTable(new ProductTable(dataSource, new ProductMapper()));
+        dataSource.addTable(new ProductTable(dataSource, new ProductMapper(), new IdentityMap<>()));
         dataSource.clear();
         dataSource.init();
 
-        ProductMapper productMapper = (ProductMapper) dataSource.getMapper(Product.class);
-        if (productMapper != null) {
-            productMapper.findAll().forEach(System.out::println);
+        IdentityMap<Product> identityMap = dataSource.getIdentityMap(Product.class);
+        if (identityMap != null) {
+            identityMap.findAll().forEach(System.out::println);
             Product product = new Product();
             product.setTitle("product 4");
-            System.out.println(productMapper.insert(product));
+            System.out.println(identityMap.save(product));
             product.setTitle("New product");
-            productMapper.update(product);
-            System.out.println(productMapper.findById(4L));
-            productMapper.delete(2L);
-            productMapper.findAll().forEach(System.out::println);
+            identityMap.save(product);
+            System.out.println(identityMap.findById(4L));
+            identityMap.findAll().forEach(System.out::println);
         }
     }
 }

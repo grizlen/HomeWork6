@@ -1,7 +1,6 @@
 package work6.db;
 
 import lombok.extern.slf4j.Slf4j;
-import work6.domein.Product;
 
 import java.sql.*;
 import java.util.Collections;
@@ -98,24 +97,31 @@ public class DataSource {
         return -1L;
     }
 
-    public void addTable(DbTable table) {
+    public void addTable(DbTable<?> table) {
         tables.put(table.tableName(), table);
         log.info("append table: '{}' for entity: {}", table.tableName(), table.getEntityClass().getSimpleName());
     }
 
     public void clear() {
-        tables.values().forEach(table -> table.drop());
+        tables.values().forEach(DbTable::drop);
     }
 
     public void init() {
-        tables.values().forEach(table -> table.create());
-        tables.values().forEach(table -> table.init());
+        tables.values().forEach(DbTable::create);
+        tables.values().forEach(DbTable::init);
     }
 
-    public DataMapper getMapper(Class entityClass) {
+    public <T extends Entity> DataMapper<T> getMapper(Class<T> entityClass) {
         return tables.values().stream()
                 .filter(table -> table.getEntityClass() == entityClass)
                 .map(table -> table.getDataMapper())
+                .findAny().orElse(null);
+    }
+
+    public <T extends Entity> IdentityMap<T> getIdentityMap(Class<T> entityClass) {
+        return tables.values().stream()
+                .filter(table -> table.getEntityClass() == entityClass)
+                .map(table -> table.getIdentityMap())
                 .findAny().orElse(null);
     }
 }
