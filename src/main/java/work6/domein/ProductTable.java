@@ -29,6 +29,6 @@ public class ProductTable extends DbTable<Product> {
                 + " (title)"
                 + " VALUES "
                 + "('product 1'), ('product 2'), ('product 3')"
-                + ");");
+                + ";");
     }
 }

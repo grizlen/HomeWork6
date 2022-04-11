@@ -1,6 +1,7 @@
 package work6.db;
 
-import java.util.ArrayList;
+import work6.domein.Product;
+
 import java.util.List;
 
 public abstract class DbTable<T extends Entity> {
@@ -39,14 +40,29 @@ public abstract class DbTable<T extends Entity> {
     }
 
     public static class SelectQuery {
+        private DbTable dbTable;
         private final String table;
+        private String fields = "*";
+        private String where = "";
 
         public SelectQuery(DbTable DbTable) {
             table = DbTable.tableName();
+            dbTable = DbTable;
         }
 
-        public <T extends Entity> List<T> execute() {
-            return new ArrayList<>();
+        private String build() {
+            StringBuilder sb = new StringBuilder("SELECT ")
+                    .append(fields)
+                    .append(" FROM ").append(table);
+            if (!where.isBlank()) {
+                sb.append(" WHERE ").append(where);
+            }
+            sb.append(";");
+            return sb.toString();
+        }
+
+        public <T extends Entity> List<T> execute(DataMapper.RecordConverter<List<T>> converter) {
+            return dbTable.dataSource.select(build(), converter);
         }
     }
 }

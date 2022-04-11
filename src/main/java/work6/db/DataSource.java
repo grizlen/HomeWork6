@@ -1,11 +1,14 @@
 package work6.db;
 
 import lombok.extern.slf4j.Slf4j;
-import work6.domein.Product;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 public class DataSource {
@@ -33,6 +36,47 @@ public class DataSource {
         log.info("Created: " + this.url);
     }
 
+    private Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(url);
+    }
+
+    public void execute(String sql) {
+        log.info("execute: {}", sql);
+        try (Connection connection = getConnection()) {
+            executeStatement(connection, sql);
+        } catch (SQLException e) {
+            log.error("execute", e);
+        }
+    }
+
+    private void executeStatement(Connection connection, String sql) throws SQLException {
+        try (Statement statement = connection.createStatement()) {
+            statement.execute(sql);
+        } catch (SQLException e) {
+            log.error("execute statement", e);
+            throw new SQLException(e);
+        }
+    }
+
+    public <T extends Entity> List<T> select(String sql, DataMapper.RecordConverter<List<T>> converter) {
+        log.info("execute: {}", sql);
+        try (Connection connection = getConnection()) {
+            return executeSelectStatement(connection, sql, converter);
+        } catch (SQLException e) {
+            log.error("execute select", e);
+            return Collections.emptyList();
+        }
+    }
+
+    private <T extends Entity> List<T> executeSelectStatement(Connection connection, String sql, DataMapper.RecordConverter<List<T>> converter) {
+        try (Statement statement = connection.createStatement()) {
+            return converter.convert(statement.executeQuery(sql));
+        } catch (SQLException e) {
+            log.error("execute select statement", e);
+            return Collections.emptyList();
+        }
+    }
+
     public void addTable(DbTable table) {
         tables.put(table.tableName(), table);
         log.info("append table: '{}' for entity: {}", table.tableName(), table.getEntityClass().getSimpleName());
@@ -54,11 +98,4 @@ public class DataSource {
                 .findAny().orElse(null);
     }
 
-    public void execute(String sql) {
-        log.info("execute: {}", sql);
-    }
-
-    public <T> List<Product> select() {
-        return null;
-    }
 }
