@@ -27,6 +27,8 @@ public class IdentityMap<T extends Entity> {
         T result = entity;
         if (entity.getId() == null) {
             result = mapper.insert(entity);
+        } else {
+            mapper.update(entity);
         }
         map.put(result.getId(), result);
         return result;
