@@ -1,8 +1,11 @@
 package work6.db;
 
 import lombok.extern.slf4j.Slf4j;
+import work6.domein.Product;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 public class DataSource {
@@ -32,5 +35,30 @@ public class DataSource {
 
     public void addTable(DbTable table) {
         tables.put(table.tableName(), table);
+        log.info("append table: '{}' for entity: {}", table.tableName(), table.getEntityClass().getSimpleName());
+    }
+
+    public void clear() {
+        tables.values().forEach(table -> table.drop());
+    }
+
+    public void init() {
+        tables.values().forEach(table -> table.create());
+        tables.values().forEach(table -> table.init());
+    }
+
+    public DataMapper getMapper(Class entityClass) {
+        return tables.values().stream()
+                .filter(table -> table.getEntityClass() == entityClass)
+                .map(table -> table.getDataMapper())
+                .findAny().orElse(null);
+    }
+
+    public void execute(String sql) {
+        log.info("execute: {}", sql);
+    }
+
+    public <T> List<Product> select() {
+        return null;
     }
 }

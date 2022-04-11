@@ -2,12 +2,16 @@ package work6.domein;
 
 import work6.db.DataMapper;
 
+import java.util.Collections;
 import java.util.List;
 
 public class ProductMapper extends DataMapper<Product> {
     @Override
     public List<Product> findAll() {
-        return null;
+        if (dbTable == null) {
+            Collections.emptyList();
+        }
+        return dbTable.select().execute();
     }
 
     @Override
