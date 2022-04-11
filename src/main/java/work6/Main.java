@@ -18,7 +18,11 @@ public class Main {
             Product product = new Product();
             product.setTitle("product 4");
             System.out.println(productMapper.insert(product));
-            System.out.println(productMapper.findById(5L));
+            product.setTitle("New product");
+            productMapper.update(product);
+            System.out.println(productMapper.findById(4L));
+            productMapper.delete(2L);
+            productMapper.findAll().forEach(System.out::println);
         }
     }
 }

@@ -64,11 +64,25 @@ public class ProductMapper extends DataMapper<Product> {
 
     @Override
     public void update(Product entity) {
-
+        if (dbTable == null
+                || entity == null
+                || entity.getId() == null) {
+            return;
+        }
+        String sql = "UPDATE " + dbTable.tableName()
+                + " SET title = '" + entity.getTitle() + "'"
+                + " WHERE id = " + entity.getId()
+                + ";";
+        dbTable.execute(sql);
     }
 
     @Override
     public void delete(Long id) {
-
+        if (dbTable == null || id == null) {
+            return;
+        }
+        String sql = "DELETE FROM " + dbTable.tableName()
+                + " WHERE id = " + id + ";";
+        dbTable.execute(sql);
     }
 }

@@ -43,6 +43,10 @@ public abstract class DbTable<T extends Entity> {
         return dataSource.executeInsert(sql);
     }
 
+    public void execute(String sql) {
+        dataSource.execute(sql);
+    }
+
     public static class SelectQuery {
         private DbTable dbTable;
         private final String table;
