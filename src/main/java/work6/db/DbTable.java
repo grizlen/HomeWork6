@@ -1,9 +1,97 @@
 package work6.db;
 
-public class DbTable<T extends Entity> {
-    private final DataMapper<T> dataMapper;
+import java.util.List;
 
-    public DbTable(DataMapper<T> dataMapper) {
+public abstract class DbTable<T extends Entity> {
+
+    protected final DataMapper<T> dataMapper;
+    private final IdentityMap<T> identityMap;
+    protected final Class<T> entityClass;
+    protected final DataSource dataSource;
+
+    public DbTable(DataSource dataSource, DataMapper<T> dataMapper, IdentityMap<T> identityMap, Class<T> entityClass) {
+        this.dataSource = dataSource;
         this.dataMapper = dataMapper;
+        this.identityMap = identityMap;
+        this.entityClass = entityClass;
+        this.dataMapper.setDbTable(this);
+        this.identityMap.setMapper(this.dataMapper);
+    }
+
+
+    public DataMapper<T> getDataMapper() {
+        return dataMapper;
+    }
+
+    public IdentityMap<T> getIdentityMap() {
+        return identityMap;
+    }
+
+    public Class<T> getEntityClass() {
+        return entityClass;
+    }
+
+    public abstract String tableName();
+
+    public void drop() {
+        dataSource.execute("DROP TABLE " + tableName() + " IF EXISTS;");
+    }
+
+    public abstract void create();
+
+    public abstract void init();
+
+    public SelectQuery<T> select() {
+        return new SelectQuery<>(this);
+    }
+
+    public Long insert(String sql) {
+        return dataSource.executeInsert(sql);
+    }
+
+    public void execute(String sql) {
+        dataSource.execute(sql);
+    }
+
+    public static class SelectQuery<T extends Entity> {
+        private final DbTable<T> dbTable;
+        private final String table;
+        private String fields = "*";
+        private String where = "";
+
+        private SelectQuery(DbTable<T> DbTable) {
+            table = DbTable.tableName();
+            dbTable = DbTable;
+        }
+
+        private String build() {
+            StringBuilder sb = new StringBuilder("SELECT ")
+                    .append(fields)
+                    .append(" FROM ").append(table);
+            if (!where.isBlank()) {
+                sb.append(" WHERE ").append(where);
+            }
+            sb.append(";");
+            return sb.toString();
+        }
+
+        public SelectQuery<T> fields(String fields) {
+            this.fields = fields;
+            return this;
+        }
+
+        public SelectQuery<T> whereId(Long id) {
+            where = "id = " + id;
+            return this;
+        }
+
+        public SelectQuery<T> where(String where) {
+            this.where = where;
+            return this;
+        }
+
+        public List<T> execute(DataMapper.RecordConverter<List<T>> converter) {
+            return dbTable.dataSource.select(build(), converter);
+        }
     }
 }
