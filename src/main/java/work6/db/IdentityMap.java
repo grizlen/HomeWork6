@@ -1,7 +1,5 @@
 package work6.db;
 
-import work6.domein.Product;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +18,16 @@ public class IdentityMap<T extends Entity> {
         return result;
     }
 
+    public Optional<T> findById(long id) {
+        T result = map.get(id);
+        if (result != null) {
+            return Optional.of(result);
+        }
+        Optional<T> optional = mapper.findById(id);
+        optional.ifPresent(entity -> map.put(entity.getId(), entity));
+        return optional;
+    }
+
     public T save(T entity) {
         if (entity == null) {
             return null;
@@ -34,13 +42,8 @@ public class IdentityMap<T extends Entity> {
         return result;
     }
 
-    public T findById(long id) {
-        T result = map.get(id);
-        if (result == null) {
-            Optional<T> optional = mapper.findById(id);
-            optional.ifPresent(entity -> map.put(entity.getId(), entity));
-            return optional.get();
-        }
-        return result;
+    public void delete(long id) {
+        mapper.delete(id);
+        map.remove(id);
     }
 }

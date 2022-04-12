@@ -22,6 +22,7 @@ public class Main {
             product.setTitle("New product");
             identityMap.save(product);
             System.out.println(identityMap.findById(4L));
+            identityMap.delete(2L);
             identityMap.findAll().forEach(System.out::println);
         }
     }

@@ -23,18 +23,18 @@ public class DataSource {
     private final String url;
     private final String user;
     private final String password;
-    private final HashMap<String, DbTable> tables;
+    private final HashMap<String, DbTable<? extends Entity>> tables;
 
     public DataSource(String url, String user, String password) {
         this.url = URL_PREFIX + url;
         this.user = user;
         this.password = password;
-        tables = new HashMap<String, DbTable>();
+        tables = new HashMap<>();
         log.info("Created: " + this.url);
     }
 
     private Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(url);
+        return DriverManager.getConnection(url, user, password);
     }
 
     public void execute(String sql) {
@@ -111,17 +111,12 @@ public class DataSource {
         tables.values().forEach(DbTable::init);
     }
 
-    public <T extends Entity> DataMapper<T> getMapper(Class<T> entityClass) {
-        return tables.values().stream()
-                .filter(table -> table.getEntityClass() == entityClass)
-                .map(table -> table.getDataMapper())
-                .findAny().orElse(null);
-    }
-
     public <T extends Entity> IdentityMap<T> getIdentityMap(Class<T> entityClass) {
-        return tables.values().stream()
+        IdentityMap<T> identityMap = (IdentityMap<T>) tables.values().stream()
                 .filter(table -> table.getEntityClass() == entityClass)
-                .map(table -> table.getIdentityMap())
-                .findAny().orElse(null);
+                .map(DbTable::getIdentityMap)
+                .findAny()
+                .orElse(null);
+        return identityMap;
     }
 }

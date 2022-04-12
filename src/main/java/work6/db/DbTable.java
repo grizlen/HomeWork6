@@ -41,8 +41,8 @@ public abstract class DbTable<T extends Entity> {
 
     public abstract void init();
 
-    public SelectQuery select() {
-        return new SelectQuery(this);
+    public SelectQuery<T> select() {
+        return new SelectQuery<>(this);
     }
 
     public Long insert(String sql) {
@@ -53,13 +53,13 @@ public abstract class DbTable<T extends Entity> {
         dataSource.execute(sql);
     }
 
-    public static class SelectQuery {
-        private final DbTable dbTable;
+    public static class SelectQuery<T extends Entity> {
+        private final DbTable<T> dbTable;
         private final String table;
         private String fields = "*";
         private String where = "";
 
-        private SelectQuery(DbTable DbTable) {
+        private SelectQuery(DbTable<T> DbTable) {
             table = DbTable.tableName();
             dbTable = DbTable;
         }
@@ -75,12 +75,22 @@ public abstract class DbTable<T extends Entity> {
             return sb.toString();
         }
 
-        public SelectQuery whereId(Long id) {
+        public SelectQuery<T> fields(String fields) {
+            this.fields = fields;
+            return this;
+        }
+
+        public SelectQuery<T> whereId(Long id) {
             where = "id = " + id;
             return this;
         }
 
-        public <T extends Entity> List<T> execute(DataMapper.RecordConverter<List<T>> converter) {
+        public SelectQuery<T> where(String where) {
+            this.where = where;
+            return this;
+        }
+
+        public List<T> execute(DataMapper.RecordConverter<List<T>> converter) {
             return dbTable.dataSource.select(build(), converter);
         }
     }
